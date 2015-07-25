@@ -1,12 +1,36 @@
-﻿$(function () {
-    $('#container').highcharts({
+﻿'use strict';
+
+$(function () {
+
+    //Connect to socketio
+    var socket = io.connect();
+
+    function getCityPosition(name) {
+        for (var i = 0; i < chart.series.length; i++) {
+            if (chart.series[i].name === name) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    socket.on('updateTemparatureForMonth', function (data) {
+        //console.log('Incoming updateData!', data);
+
+        var positionOfCity = getCityPosition(data.cityName);
+        if (positionOfCity > 0) {
+            chart.series[positionOfCity].data[data.month].update(data.value);
+        }
+    });
+
+    var chart = new Highcharts.Chart({
+        chart: {
+            renderTo: 'container',
+            type: 'line'
+        },
         title: {
             text: 'Monthly Average Temperature',
             x: -20 //center
-        },
-        subtitle: {
-            text: 'Source: WorldClimate.com',
-            x: -20
         },
         xAxis: {
             categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

@@ -17,17 +17,43 @@ io.on('connection', function (socket) {
         console.log('user disconnected');
     });
 
-    //Send new data to all users
-    function sendData() {
-        io.emit('updateData', getRandomXY());
+    //Send new temperature to all users
+    function sendNewTemparature(city) {
+        var obj = getMonthTemperature();
+        obj.cityName = city;
+        io.emit('updateTemparatureForMonth', obj);
     }
 
-    (function loop() {
-        var rand = Math.round(Math.random() * (5000 - 2500)) + 500;
+    (function loopNewTemperatureTokyo() {
+        var rand = Math.round(Math.random() * 15000) + 500;
         setTimeout(function () {
-            sendData();
+            sendNewTemparature('Tokyo');
             //Call again loop function that creates timer
-            loop();
+            loopNewTemperatureTokyo();
+        }, rand);
+    }());
+    (function loopNewTemperatureNewYork() {
+        var rand = Math.round(Math.random() * 15000) + 500;
+        setTimeout(function () {
+            sendNewTemparature('New York');
+            //Call again loop function that creates timer
+            loopNewTemperatureNewYork();
+        }, rand);
+    }());
+    (function loopNewTemperatureBerlin() {
+        var rand = Math.round(Math.random() * 15000) + 500;
+        setTimeout(function () {
+            sendNewTemparature('Berlin');
+            //Call again loop function that creates timer
+            loopNewTemperatureBerlin();
+        }, rand);
+    }());
+    (function loopNewTemperatureLondon() {
+        var rand = Math.round(Math.random() * 15000) + 500;
+        setTimeout(function () {
+            sendNewTemparature('London');
+            //Call again loop function that creates timer
+            loopNewTemperatureLondon();
         }, rand);
     }());
 
@@ -41,6 +67,14 @@ app.get('/', function (req, res) {
 /**
  * Functions
  */
+function getMonthTemperature() {
+    return {
+        month: getRandomIntInclusive(0, 11),
+        value: getRandomInt(0, 36)
+    };
+}
+
+
 function getRandomXY() {
     return {
         x: getRandomInt(1, 5),
