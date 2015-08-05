@@ -15,6 +15,7 @@
   "dependencies": {
     "bootstrap": "~3.3.5",
     "font-awesome": "4.3.0",
-    "highcharts-release": "~4.1.7"
+    "highcharts-release": "~4.1.7",
+    "gridster": "~0.5.6"
   }
 }

@@ -12,51 +12,10 @@ http.listen(port, function () {
 
 io.on('connection', function (socket) {
     console.log('a user connected');
-
+    
     socket.on('disconnect', function () {
         console.log('user disconnected');
     });
-
-    //Send new temperature to all users
-    function sendNewTemparature(city) {
-        var obj = getMonthTemperature();
-        obj.cityName = city;
-        io.emit('updateTemparatureForMonth', obj);
-    }
-
-    (function loopNewTemperatureTokyo() {
-        var rand = Math.round(Math.random() * 15000) + 500;
-        setTimeout(function () {
-            sendNewTemparature('Tokyo');
-            //Call again loop function that creates timer
-            loopNewTemperatureTokyo();
-        }, rand);
-    }());
-    (function loopNewTemperatureNewYork() {
-        var rand = Math.round(Math.random() * 15000) + 500;
-        setTimeout(function () {
-            sendNewTemparature('New York');
-            //Call again loop function that creates timer
-            loopNewTemperatureNewYork();
-        }, rand);
-    }());
-    (function loopNewTemperatureBerlin() {
-        var rand = Math.round(Math.random() * 15000) + 500;
-        setTimeout(function () {
-            sendNewTemparature('Berlin');
-            //Call again loop function that creates timer
-            loopNewTemperatureBerlin();
-        }, rand);
-    }());
-    (function loopNewTemperatureLondon() {
-        var rand = Math.round(Math.random() * 15000) + 500;
-        setTimeout(function () {
-            sendNewTemparature('London');
-            //Call again loop function that creates timer
-            loopNewTemperatureLondon();
-        }, rand);
-    }());
-
 });
 
 app.get('/', function (req, res) {
@@ -64,9 +23,83 @@ app.get('/', function (req, res) {
 });
 
 
+//Send new temperature to all users
+function sendNewTemparature(city) {
+    var obj = getMonthTemperature();
+    obj.cityName = city;
+    io.emit('updateTemparatureForMonth', obj);
+}
+
+(function loopNewTemperatureTokyo() {
+    var rand = Math.round(Math.random() * 15000) + 500;
+    setTimeout(function () {
+        sendNewTemparature('Tokyo');
+        //Call again loop function that creates timer
+        loopNewTemperatureTokyo();
+    }, rand);
+}());
+(function loopNewTemperatureNewYork() {
+    var rand = Math.round(Math.random() * 15000) + 500;
+    setTimeout(function () {
+        sendNewTemparature('New York');
+        //Call again loop function that creates timer
+        loopNewTemperatureNewYork();
+    }, rand);
+}());
+(function loopNewTemperatureBerlin() {
+    var rand = Math.round(Math.random() * 15000) + 500;
+    setTimeout(function () {
+        sendNewTemparature('Berlin');
+        //Call again loop function that creates timer
+        loopNewTemperatureBerlin();
+    }, rand);
+}());
+(function loopNewTemperatureLondon() {
+    var rand = Math.round(Math.random() * 15000) + 500;
+    setTimeout(function () {
+        sendNewTemparature('London');
+        //Call again loop function that creates timer
+        loopNewTemperatureLondon();
+    }, rand);
+}());
+
+
+
+//Send new browser shares
+(function loopNewBrowserShare() {
+    var rand = Math.round(Math.random() * 15000) + 500;
+    setTimeout(function () {
+        
+        var obj = getBrowserShare();
+        console.log(obj);
+        io.emit('updateBrowserMarketShares', obj);
+        
+        //Call again loop function that creates timer
+        loopNewBrowserShare();
+    }, rand);
+}());
+
+
+
 /**
  * Functions
  */
+var browsers = ['Firefox','IE','Chrome','Safari','Opera','Others'];
+function getBrowserShare() {
+    var rands = [], rand, total = 0, normalized_rands = [];
+    for (var i = 0; i < 6; i += 1) {
+        rand = Math.random();
+        rands.push(rand);
+        total += rand;
+    }
+    for (var i = 0; i < 6; i += 1) {
+        rand = rands[i] / total;
+        normalized_rands.push([browsers[i], rand * 100]);
+    }
+    return normalized_rands;
+}
+
+
 function getMonthTemperature() {
     return {
         month: getRandomIntInclusive(0, 11),

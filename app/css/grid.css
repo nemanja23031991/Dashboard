@@ -1,0 +1,53 @@
+﻿#container {
+    min-width: 310px;
+    min-height: 400px;
+    margin: 0 auto;
+}
+
+    #container * {
+        margin: 0;
+        padding: 0;
+    }
+
+    #container ul {
+        background-color: #EFEFEF;
+        list-style-type: none;
+        height: 100%;
+        width: 100%;
+        position: relative;
+        min-height: 400px;
+        min-width: 310px;
+    }
+
+    #container li {
+        font-size: 1em;
+        font-weight: bold;
+        text-align: center;
+        line-height: 100%;
+    }
+
+
+#container {
+    margin: 0 auto;
+    opacity: .8;
+    -webkit-transition: opacity .6s;
+    -moz-transition: opacity .6s;
+    -o-transition: opacity .6s;
+    -ms-transition: opacity .6s;
+    transition: opacity .6s;
+}
+
+    #container .gs-w {
+        background: #DDD;
+        cursor: pointer;
+    }
+
+    #container .player {
+        background: #BBB;
+    }
+
+
+    #container .preview-holder {
+        border: none !important;
+        background: red !important;
+    }
