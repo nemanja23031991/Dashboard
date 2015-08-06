@@ -11,10 +11,12 @@
         
         //Init gridster
         gridster = $("#grid").gridster({
-            //widget_base_dimensions: [100, 55],
+            widget_base_dimensions: [75, 75],
             avoid_overlapped_widgets: true,
             autogrow_cols: true,
             widget_margins: [5, 5],
+            min_cols: 1,
+            min_rows: 1,
             helper: 'clone',
             resize: {
                 enabled: true,
@@ -34,6 +36,7 @@
         $('.newPieChart').click(addPieChart);
         $('.newBasicLineChart').click(addBasicLineChart);
         $('.newAreaMissingChart').click(addAreaMissingChart);
+        $('.newColumnWithBrowserShares').click(addColumnWithBrowserShares);
         
         socket.on('updateTemparatureForMonth', updateTemperatureForMonth);
         socket.on('updateBrowserMarketShares', updateBrowserMarketShares);
@@ -43,9 +46,9 @@
      */
     function addPieChart() {
         
-        var newItem = $('<li class="gs-w" data-sizex="4" data-sizey="4"><div class="pieChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><div class="pieChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
-        gridster.add_widget.apply(gridster, [newItem]);
+        gridster.add_widget.apply(gridster, [newItem, 4, 4]);
         
         $(newItem).find('.chart').highcharts({
             chart: {
@@ -54,7 +57,7 @@
                 plotShadow: false
             },
             title: {
-                text: 'Browser market shares at a specific website, 2010'
+                text: 'Browser market shares at a specific website, 2015'
             },
             tooltip: {
                 pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
@@ -92,9 +95,9 @@
      * New basic line chart 
      */
     function addBasicLineChart() {
-        var newItem = $('<li class="gs-w" data-sizex="6" data-sizey="4"><div class="basicLineChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><div class="basicLineChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
-        gridster.add_widget.apply(gridster, [newItem]);
+        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
         
         $(newItem).find('.chart').highcharts({
             title: {
@@ -147,9 +150,9 @@
      * New area missing 
      */
     function addAreaMissingChart() {
-        var newItem = $('<li class="gs-w" data-sizex="6" data-sizey="4"><div class="areaMissingChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><div class="areaMissingChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
-        gridster.add_widget.apply(gridster, [newItem]);
+        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
         
         $(newItem).find('.chart').highcharts({
             chart: {
@@ -214,13 +217,96 @@
     }
     
     /*
+     * New Column of browser shares
+     */
+    function addColumnWithBrowserShares() {
+        var newItem = $('<li><div class="columnWithBrowserSharesChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        
+        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
+        
+        
+        $(newItem).find('.chart').highcharts({
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Browser market shares. January, 2015 to May, 2015'
+            },
+            subtitle: {
+                text: 'Click the columns to view versions. Source: <a href="http://netmarketshare.com">netmarketshare.com</a>.'
+            },
+            xAxis: {
+                type: 'category'
+            },
+            yAxis: {
+                title: {
+                    text: 'Total percent market share'
+                }
+
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.1f}%'
+                    }
+                }
+            },
+            
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+            },
+            
+            series: [{
+                    name: "Brands",
+                    colorByPoint: true,
+                    data: [{
+                            name: "IE",
+                            y: 56.33
+                        }, {
+                            name: "Chrome",
+                            y: 24.03
+                        }, {
+                            name: "Firefox",
+                            y: 10.38
+                        }, {
+                            name: "Safari",
+                            y: 4.77
+                        }, {
+                            name: "Opera",
+                            y: 0.91
+                        }, {
+                            name: "Others",
+                            y: 0.2
+                        }]
+                }]
+        });
+    }
+    
+    /*
      * Update PieChart 
      */
     function updateBrowserMarketShares(data) {
         console.log(data);
+        var columnData = [];
+        for (var i = 0; i < data.length; i++) {
+            columnData.push({
+                name: data[i][0],
+                y: data[i][1]
+            });
+        }
+        console.log(columnData);
         for (var i = 0; i < Highcharts.charts.length; i++) {
             if ($(Highcharts.charts[i].renderTo).hasClass('pieChart')) {
                 Highcharts.charts[i].series[0].setData(data);
+            }
+            if ($(Highcharts.charts[i].renderTo).hasClass('columnWithBrowserSharesChart')) {
+                Highcharts.charts[i].series[0].setData(columnData);
             }
         }
     }
