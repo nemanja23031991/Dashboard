@@ -18,8 +18,6 @@
             avoid_overlapped_widgets: true,
             autogrow_cols: true,
             widget_margins: [5, 5],
-            min_cols: 1,
-            min_rows: 1,
             helper: 'clone',
             resize: {
                 enabled: true,
@@ -45,6 +43,10 @@
         
         socket.on('updateTemparatureForMonth', updateTemperatureForMonth);
         socket.on('updateCarMarketShares', updateCarMarketShares);
+
+        $('#grid').on('click', '.removeWidget', function () { 
+            gridster.remove_widget($(this).parents('li'));
+        });
     });
 
     /*
@@ -52,7 +54,7 @@
      */
     function addPieChartWithCarShares() {
         
-        var newItem = $('<li><div class="pieChartWithCarShares chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="pieChartWithCarShares chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
         gridster.add_widget.apply(gridster, [newItem, 4, 4]);
         
@@ -105,7 +107,7 @@
      * New Column of car shares
      */
     function addColumnWithCarShares() {
-        var newItem = $('<li><div class="columnWithCarSharesChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="columnWithCarSharesChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
         gridster.add_widget.apply(gridster, [newItem, 6, 4]);
         
@@ -168,7 +170,7 @@
      * New semi circle donut chart with car shares
      */
     function addSemiDonutChartWithCarShares() {
-        var newItem = $('<li><div class="semiDonutChartWithCarShares chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="semiDonutChartWithCarShares chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
         gridster.add_widget.apply(gridster, [newItem, 4, 4]);
         
@@ -274,7 +276,7 @@
      * New basic line chart 
      */
     function addBasicLineChart() {
-        var newItem = $('<li><div class="basicLineChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="basicLineChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
         gridster.add_widget.apply(gridster, [newItem, 6, 4]);
         
@@ -330,7 +332,7 @@
      * New area missing 
      */
     function addAreaMissingChart() {
-        var newItem = $('<li><div class="areaMissingChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="areaMissingChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
         gridster.add_widget.apply(gridster, [newItem, 6, 4]);
         

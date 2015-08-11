@@ -2,6 +2,12 @@
     min-width: 310px;
     min-height: 400px;
     margin: 0 auto;
+    opacity: .8;
+    -webkit-transition: opacity .6s;
+    -moz-transition: opacity .6s;
+    -o-transition: opacity .6s;
+    -ms-transition: opacity .6s;
+    transition: opacity .6s;
 }
 
     #container * {
@@ -26,17 +32,6 @@
         line-height: 100%;
     }
 
-
-#container {
-    margin: 0 auto;
-    opacity: .8;
-    -webkit-transition: opacity .6s;
-    -moz-transition: opacity .6s;
-    -o-transition: opacity .6s;
-    -ms-transition: opacity .6s;
-    transition: opacity .6s;
-}
-
     #container .gs-w {
         background: #DDD;
         cursor: pointer;
@@ -51,3 +46,10 @@
         border: none !important;
         background: red !important;
     }
+
+.removeWidget {
+    position: absolute;
+    z-index: 10;
+    right: 5px;
+    top: 5px;
+}
