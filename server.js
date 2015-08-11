@@ -21,6 +21,9 @@ io.on('connection', function (socket) {
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
+app.get('/api/carshare', function (req, res) {
+    res.json(lastSentCarShareData);
+});
 
 
 //Send new temperature to all users
@@ -65,17 +68,19 @@ function sendNewTemparature(city) {
 
 
 
+var lastSentCarShareData = {};
 //Send new browser shares
-(function loopNewBrowserShare() {
+(function loopNewCarShare() {
     var rand = Math.round(Math.random() * 15000) + 500;
     setTimeout(function () {
+        var obj = {};
+        obj.data = getCarShare();
+        obj.year = getRandomInt(1970, 2016);
+        io.emit('updateCarMarketShares', obj);
         
-        var obj = getBrowserShare();
-        console.log(obj);
-        io.emit('updateBrowserMarketShares', obj);
-        
+        lastSentCarShareData = obj;
         //Call again loop function that creates timer
-        loopNewBrowserShare();
+        loopNewCarShare();
     }, rand);
 }());
 
@@ -84,21 +89,21 @@ function sendNewTemparature(city) {
 /**
  * Functions
  */
-var browsers = ['Firefox','IE','Chrome','Safari','Opera','Others'];
-function getBrowserShare() {
+var cars = ['Toyota', 'General Motors', 'Volkswagen', 'Hyndai-Kia', 'Renault-Nissan', 'Ford',
+     'Fiat-Chrysler', 'Honda', 'Peugeot', 'BMW', 'Audi', 'Others'];
+function getCarShare() {
     var rands = [], rand, total = 0, normalized_rands = [];
-    for (var i = 0; i < 6; i += 1) {
+    for (var i = 0; i < cars.length; i += 1) {
         rand = Math.random();
         rands.push(rand);
         total += rand;
     }
-    for (var i = 0; i < 6; i += 1) {
+    for (var i = 0; i < cars.length; i += 1) {
         rand = rands[i] / total;
-        normalized_rands.push([browsers[i], rand * 100]);
+        normalized_rands.push([cars[i], rand * 100]);
     }
     return normalized_rands;
 }
-
 
 function getMonthTemperature() {
     return {
@@ -106,7 +111,6 @@ function getMonthTemperature() {
         value: getRandomInt(0, 36)
     };
 }
-
 
 function getRandomXY() {
     return {

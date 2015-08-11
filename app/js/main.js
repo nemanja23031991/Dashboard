@@ -6,6 +6,9 @@
     
     $(document).ready(function () {
         
+        //Create menu
+        $('#side-menu').metisMenu();
+        
         //Connect to socketio
         var socket = io.connect();
         
@@ -33,20 +36,23 @@
         /*
         *Events 
         */
-        $('.newPieChart').click(addPieChart);
+        $('.newPieChartWithCartShares').click(addPieChartWithCarShares);
+        $('.newColumnWithCarShares').click(addColumnWithCarShares);
+        $('.newSemiDonutChartWithCarShares').click(addSemiDonutChartWithCarShares);
+
         $('.newBasicLineChart').click(addBasicLineChart);
         $('.newAreaMissingChart').click(addAreaMissingChart);
-        $('.newColumnWithBrowserShares').click(addColumnWithBrowserShares);
         
         socket.on('updateTemparatureForMonth', updateTemperatureForMonth);
-        socket.on('updateBrowserMarketShares', updateBrowserMarketShares);
+        socket.on('updateCarMarketShares', updateCarMarketShares);
     });
+
     /*
-     * New pie chart 
+     * New pie chart for car shares
      */
-    function addPieChart() {
+    function addPieChartWithCarShares() {
         
-        var newItem = $('<li><div class="pieChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        var newItem = $('<li><div class="pieChartWithCarShares chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
         
         gridster.add_widget.apply(gridster, [newItem, 4, 4]);
         
@@ -57,8 +63,9 @@
                 plotShadow: false
             },
             title: {
-                text: 'Browser market shares at a specific website, 2015'
+                text: 'Car market shares, 2015'
             },
+            credits: false,
             tooltip: {
                 pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
             },
@@ -77,20 +84,192 @@
             series: [{
                     type: 'pie',
                     name: 'Share',
-                    data: [
-                        ['Firefox', 25.0],
-                        ['IE', 46.8], {
-                            name: 'Chrome',
-                            y: 12.8,
-                            sliced: true,
-                            selected: true
-                        }, ['Safari', 8.5],
-                        ['Opera', 6.2],
-                        ['Others', 0.7]
-                    ]
+                    data: []
                 }]
         });
+        
+        //Show loading animation
+        var chart = $(newItem).find('.chart').highcharts(); 
+        chart.showLoading();
+
+        //Get carshares
+        $.get('/api/carshare', {}, function (data) {
+            //Update this cart
+            updatePieChartWithCarShares(chart, data);
+            //Remove loading animation
+            chart.hideLoading();
+        });
     }
+    
+    /*
+     * New Column of car shares
+     */
+    function addColumnWithCarShares() {
+        var newItem = $('<li><div class="columnWithCarSharesChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        
+        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
+        
+        $(newItem).find('.chart').highcharts({
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Car market shares, 2015'
+            },
+            credits: false,
+            xAxis: {
+                type: 'category'
+            },
+            yAxis: {
+                title: {
+                    text: 'Total percent market share'
+                }
+
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.1f}%'
+                    }
+                }
+            },
+            
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+            },
+            
+            series: [{
+                    name: "Brands",
+                    colorByPoint: true,
+                    data: []
+                }]
+        });
+
+        //Show loading animation
+        var chart = $(newItem).find('.chart').highcharts();
+        chart.showLoading();
+        
+        //Get carshares
+        $.get('/api/carshare', {}, function (data) {
+            //Update this cart
+            updateColumnWithCarSharesChart(chart, data);
+            //Remove loading animation
+            chart.hideLoading();
+        });
+    }
+    
+    /*
+     * New semi circle donut chart with car shares
+     */
+    function addSemiDonutChartWithCarShares() {
+        var newItem = $('<li><div class="semiDonutChartWithCarShares chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        
+        gridster.add_widget.apply(gridster, [newItem, 4, 4]);
+        
+        $(newItem).find('.chart').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+            title: {
+                text: 'Car<br>shares<br>2015',
+                align: 'center',
+                verticalAlign: 'middle',
+                y: 40
+            },
+            credits: false,
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    dataLabels: {
+                        enabled: true,
+                        distance: -50,
+                        style: {
+                            fontWeight: 'bold',
+                            color: 'white',
+                            textShadow: '0px 1px 2px black'
+                        }
+                    },
+                    startAngle: -90,
+                    endAngle: 90,
+                    center: ['50%', '75%']
+                }
+            },
+            series: [{
+                    type: 'pie',
+                    name: 'Car share',
+                    innerSize: '50%',
+                    data: []
+                }]
+        });
+
+        //Show loading animation
+        var chart = $(newItem).find('.chart').highcharts();
+        chart.showLoading();
+        
+        //Get carshares
+        $.get('/api/carshare', {}, function (data) {
+            //Update this cart
+            updateSemiDonutChartWithCarShares(chart, data);
+            //Remove loading animation
+            chart.hideLoading();
+        });
+    }
+    
+    /*
+     * Update Car market shares 
+     */
+    function updateCarMarketShares(obj) {
+        console.log(obj);
+        for (var i = 0; i < Highcharts.charts.length; i++) {
+            if ($(Highcharts.charts[i].renderTo).hasClass('pieChartWithCarShares')) {
+                updatePieChartWithCarShares(Highcharts.charts[i], obj);
+            }
+            else if ($(Highcharts.charts[i].renderTo).hasClass('columnWithCarSharesChart')) {
+                updateColumnWithCarSharesChart(Highcharts.charts[i], obj); 
+            }
+            else if ($(Highcharts.charts[i].renderTo).hasClass('semiDonutChartWithCarShares')) {
+                updateSemiDonutChartWithCarShares(Highcharts.charts[i], obj);
+            }
+        }
+    }
+    function updatePieChartWithCarShares(chart, obj){
+        chart.series[0].setData(obj.data);
+        chart.setTitle({ text: "Car market shares, " + obj.year });
+    }
+    function updateColumnWithCarSharesChart(chart, obj) {
+        var columnData = [];
+        for (var i = 0; i < obj.data.length; i++) {
+            columnData.push({
+                name: obj.data[i][0],
+                y: obj.data[i][1]
+            });
+        }
+        chart.series[0].setData(columnData);
+        chart.setTitle({ text: "Car market shares, " + obj.year });
+    }
+    function updateSemiDonutChartWithCarShares(chart, obj) {
+        var columnData = [];
+        for (var i = 0; i < obj.data.length; i++) {
+            columnData.push({
+                name: obj.data[i][0],
+                y: obj.data[i][1]
+            });
+        }
+        chart.series[0].setData(columnData);
+        chart.setTitle({ text: "Car<br>shares<br>" + obj.year });
+    }
+    
+    
     /*
      * New basic line chart 
      */
@@ -108,6 +287,7 @@
                 text: 'Source: WorldClimate.com',
                 x: -20
             },
+            credits: false,
             xAxis: {
                 categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -169,6 +349,7 @@
                 verticalAlign: 'bottom',
                 y: 15
             },
+            credits: false,
             legend: {
                 layout: 'vertical',
                 align: 'left',
@@ -203,9 +384,6 @@
                     fillOpacity: 0.5
                 }
             },
-            credits: {
-                enabled: false
-            },
             series: [{
                     name: 'John',
                     data: [0, 1, 4, 4, 5, 2, 3, 7]
@@ -214,101 +392,6 @@
                     data: [1, 0, 3, null, 3, 1, 2, 1]
                 }]
         });
-    }
-    
-    /*
-     * New Column of browser shares
-     */
-    function addColumnWithBrowserShares() {
-        var newItem = $('<li><div class="columnWithBrowserSharesChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
-        
-        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
-        
-        
-        $(newItem).find('.chart').highcharts({
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: 'Browser market shares. January, 2015 to May, 2015'
-            },
-            subtitle: {
-                text: 'Click the columns to view versions. Source: <a href="http://netmarketshare.com">netmarketshare.com</a>.'
-            },
-            xAxis: {
-                type: 'category'
-            },
-            yAxis: {
-                title: {
-                    text: 'Total percent market share'
-                }
-
-            },
-            legend: {
-                enabled: false
-            },
-            plotOptions: {
-                series: {
-                    borderWidth: 0,
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.y:.1f}%'
-                    }
-                }
-            },
-            
-            tooltip: {
-                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
-            },
-            
-            series: [{
-                    name: "Brands",
-                    colorByPoint: true,
-                    data: [{
-                            name: "IE",
-                            y: 56.33
-                        }, {
-                            name: "Chrome",
-                            y: 24.03
-                        }, {
-                            name: "Firefox",
-                            y: 10.38
-                        }, {
-                            name: "Safari",
-                            y: 4.77
-                        }, {
-                            name: "Opera",
-                            y: 0.91
-                        }, {
-                            name: "Others",
-                            y: 0.2
-                        }]
-                }]
-        });
-    }
-    
-    /*
-     * Update PieChart 
-     */
-    function updateBrowserMarketShares(data) {
-        console.log(data);
-        var columnData = [];
-        for (var i = 0; i < data.length; i++) {
-            columnData.push({
-                name: data[i][0],
-                y: data[i][1]
-            });
-        }
-        console.log(columnData);
-        for (var i = 0; i < Highcharts.charts.length; i++) {
-            if ($(Highcharts.charts[i].renderTo).hasClass('pieChart')) {
-                Highcharts.charts[i].series[0].setData(data);
-            }
-            if ($(Highcharts.charts[i].renderTo).hasClass('columnWithBrowserSharesChart')) {
-                Highcharts.charts[i].series[0].setData(columnData);
-            }
-        }
     }
     
     /*
