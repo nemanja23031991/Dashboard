@@ -8,7 +8,8 @@
         
         //Create menu
         $('#side-menu').metisMenu();
-        
+        $('#collapse-menu').click(collapseMenuClick);
+
         //Connect to socketio
         var socket = io.connect();
         
@@ -428,4 +429,31 @@
         return -1;
     }
 
+
+
+    /**
+     * Collapse or expand menu
+     */
+    function collapseMenuClick() {
+        if ($('.sidebar').hasClass('reduced')) {
+            $('.sidebar').removeClass('reduced');
+
+            //Change arrow in collapse button
+            $('#collapse-menu i').removeClass('fa-chevron-right');
+            $('#collapse-menu i').addClass('fa-chevron-left');
+
+            $('#page-wrapper').css('margin', '0 0 0 250px');
+            $('#side-menu').show();
+        }
+        else {
+            $('.sidebar').addClass('reduced');
+
+            //Change arrow in collapse button
+            $('#collapse-menu i').removeClass('fa-chevron-left');
+            $('#collapse-menu i').addClass('fa-chevron-right');
+
+            $('#page-wrapper').css('margin', '0 0 0 50px');
+            $('#side-menu').hide();
+        }
+    }
 })();

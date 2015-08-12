@@ -146,4 +146,32 @@ body {
         color: #fff;
     }
 
+#collapse-menu {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    width: 250px;
+}
 
+    #collapse-menu i {
+        float: right;
+        padding: 15px;
+    }
+
+        #collapse-menu i:hover {
+            cursor: pointer;
+        }
+
+@media(min-width:768px) {
+    #collapse-menu {
+        display: block;
+    }
+}
+
+.sidebar.reduced {
+    width: 50px;
+}
+
+    .sidebar.reduced #collapse-menu {
+        width: 50px;
+    }
