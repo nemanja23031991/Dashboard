@@ -29,7 +29,7 @@
                 }
             }
 
-        }).data('gridster');
+        }).width('auto').data('gridster');
         
         /*
         *Events 
@@ -39,10 +39,11 @@
         $('.newSemiDonutChartWithCarShares').click(addSemiDonutChartWithCarShares);
 
         $('.newBasicLineChart').click(addBasicLineChart);
-        $('.newAreaMissingChart').click(addAreaMissingChart);
+        $('.newAverageSoldCarsChart').click(addAverageSoldCarsChart);
         
         socket.on('updateTemparatureForMonth', updateTemperatureForMonth);
         socket.on('updateCarMarketShares', updateCarMarketShares);
+        socket.on('updateAvgSoldCars', updateAvgSoldCars);
 
         $('#grid').on('click', '.removeWidget', function () { 
             gridster.remove_widget($(this).parents('li'));
@@ -201,15 +202,15 @@
                             textShadow: '0px 1px 2px black'
                         }
                     },
-                    startAngle: -90,
-                    endAngle: 90,
-                    center: ['50%', '75%']
+                    startAngle: -100,
+                    endAngle: 100,
+                    center: ['50%', '80%']
                 }
             },
             series: [{
                     type: 'pie',
                     name: 'Car share',
-                    innerSize: '50%',
+                    innerSize: '60%',
                     data: []
                 }]
         });
@@ -231,7 +232,6 @@
      * Update Car market shares 
      */
     function updateCarMarketShares(obj) {
-        console.log(obj);
         for (var i = 0; i < Highcharts.charts.length; i++) {
             if ($(Highcharts.charts[i].renderTo).hasClass('pieChartWithCarShares')) {
                 updatePieChartWithCarShares(Highcharts.charts[i], obj);
@@ -328,90 +328,98 @@
                 }]
         });
     }
+
     /*
-     * New area missing 
-     */
-    function addAreaMissingChart() {
-        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="areaMissingChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
-        
-        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
-        
-        $(newItem).find('.chart').highcharts({
-            chart: {
-                type: 'area',
-                spacingBottom: 30
-            },
-            title: {
-                text: 'Fruit consumption *'
-            },
-            subtitle: {
-                text: '* Jane\'s banana consumption is unknown',
-                floating: true,
-                align: 'right',
-                verticalAlign: 'bottom',
-                y: 15
-            },
-            credits: false,
-            legend: {
-                layout: 'vertical',
-                align: 'left',
-                verticalAlign: 'top',
-                x: 150,
-                y: 100,
-                floating: true,
-                borderWidth: 1,
-                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
-            },
-            xAxis: {
-                categories: ['Apples', 'Pears', 'Oranges', 'Bananas', 'Grapes', 'Plums', 'Strawberries', 'Raspberries']
-            },
-            yAxis: {
-                title: {
-                    text: 'Y-Axis'
-                },
-                labels: {
-                    formatter: function () {
-                        return this.value;
-                    }
-                }
-            },
-            tooltip: {
-                formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/>' +
-                    this.x + ': ' + this.y;
-                }
-            },
-            plotOptions: {
-                area: {
-                    fillOpacity: 0.5
-                }
-            },
-            series: [{
-                    name: 'John',
-                    data: [0, 1, 4, 4, 5, 2, 3, 7]
-                }, {
-                    name: 'Jane',
-                    data: [1, 0, 3, null, 3, 1, 2, 1]
-                }]
-        });
-    }
-    
-    /*
-     * Update BasicLineChart 
-     */
+    * Update BasicLineChart 
+    */
     function updateTemperatureForMonth(data) {
-        console.log('Incoming updateData!', data);
         for (var i = 0; i < Highcharts.charts.length; i++) {
             if ($(Highcharts.charts[i].renderTo).hasClass('basicLineChart')) {
-                var positionOfCity = getCityPosition(Highcharts.charts[i], data.cityName);
-                if (positionOfCity > 0) {
+                var positionOfCity = getPositionByName(Highcharts.charts[i], data.cityName);
+                if (positionOfCity > -1) {
                     Highcharts.charts[i].series[positionOfCity].data[data.month].update(data.value);
                 }
             }
         }
     }
+
+    /*
+     * New area missing 
+     */
+    function addAverageSoldCarsChart() {
+        var newItem = $('<li><span class="removeWidget"><i class="fa fa-times"></i></span><div class="averageSoldCarsChart chart" style="width:100%;height:100%;margin: 0 auto"></div></li>');
+        
+        gridster.add_widget.apply(gridster, [newItem, 6, 4]);
+        
+        $(newItem).find('.chart').highcharts({
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Monthly Average Number Of Sold Cars'
+            },
+            subtitle: {
+                text: '2012'
+            },
+            xAxis: {
+                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            },
+            yAxis: {
+                title: {
+                    text: 'Milions'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: []
+        });
+
+
+        //Show loading animation
+        var chart = $(newItem).find('.chart').highcharts();
+        chart.showLoading();
+
+        //Get carshares
+        $.get('/api/avg-sold-cars', {}, function (data) {
+            //Update this cart
+            updateLineChartWithAvgSoldCars(chart, data);
+            //Remove loading animation
+            chart.hideLoading();
+        });
+    }
     
-    function getCityPosition(chart, name) {
+    function updateAvgSoldCars(data) {
+        for (var i = 0; i < Highcharts.charts.length; i++) {
+            if ($(Highcharts.charts[i].renderTo).hasClass('averageSoldCarsChart')) {
+                updateLineChartWithAvgSoldCars(Highcharts.charts[i], data);
+            }
+        }
+    }
+    function updateLineChartWithAvgSoldCars(chart, obj) {
+
+        chart.setTitle({ text: 'Monthly Average Number Of Sold Cars' }, { text: obj.year });
+
+        for (var i = 0; i < obj.data.length; i++) {
+            var position = getPositionByName(chart, obj.data[i].continentName);
+            if (position > -1) {
+                chart.series[position].setData(obj.data[i].data);
+            }
+            else {
+                chart.addSeries({ name: obj.data[i].continentName, data: obj.data[i].data });
+            }
+        }
+    }
+
+    /**
+     * Get position in chart by series name
+     */
+    function getPositionByName(chart, name) {
         for (var i = 0; i < chart.series.length; i++) {
             if (chart.series[i].name === name) {
                 return i;

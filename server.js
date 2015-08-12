@@ -12,7 +12,7 @@ http.listen(port, function () {
 
 io.on('connection', function (socket) {
     console.log('a user connected');
-    
+
     socket.on('disconnect', function () {
         console.log('user disconnected');
     });
@@ -24,7 +24,9 @@ app.get('/', function (req, res) {
 app.get('/api/carshare', function (req, res) {
     res.json(lastSentCarShareData);
 });
-
+app.get('/api/avg-sold-cars', function (req, res) {
+    res.json(lastSentAvgSoldCarsByMonth);
+});
 
 //Send new temperature to all users
 function sendNewTemparature(city) {
@@ -77,7 +79,7 @@ var lastSentCarShareData = {};
         obj.data = getCarShare();
         obj.year = getRandomInt(1970, 2016);
         io.emit('updateCarMarketShares', obj);
-        
+
         lastSentCarShareData = obj;
         //Call again loop function that creates timer
         loopNewCarShare();
@@ -85,12 +87,27 @@ var lastSentCarShareData = {};
 }());
 
 
+var lastSentAvgSoldCarsByMonth = {};
+//Send new browser shares
+(function loopNewAvgSoldCars() {
+    var rand = Math.round(Math.random() * 15000) + 500;
+    setTimeout(function () {
+        var obj = {};
+        obj.data = getCarAvgSale();
+        obj.year = getRandomInt(1970, 2016);
+        io.emit('updateAvgSoldCars', obj);
+
+        lastSentAvgSoldCarsByMonth = obj;
+        //Call again loop function that creates timer
+        loopNewAvgSoldCars();
+    }, rand);
+}());
+
 
 /**
  * Functions
  */
-var cars = ['Toyota', 'General Motors', 'Volkswagen', 'Hyndai-Kia', 'Renault-Nissan', 'Ford',
-     'Fiat-Chrysler', 'Honda', 'Peugeot', 'BMW', 'Audi', 'Others'];
+var cars = ['Toyota', 'General Motors', 'Volkswagen', 'Ford', 'BMW', 'Audi', 'Others'];
 function getCarShare() {
     var rands = [], rand, total = 0, normalized_rands = [];
     for (var i = 0; i < cars.length; i += 1) {
@@ -103,6 +120,25 @@ function getCarShare() {
         normalized_rands.push([cars[i], rand * 100]);
     }
     return normalized_rands;
+}
+
+var continents = ['Africa', 'South America', 'Australia', 'North America', 'Europe', 'Asia', ];
+function getCarAvgSale() {
+    var values = [];
+    for (var i = 0; i < continents.length; i++) {
+        var obj = {
+            continentName: continents[i]
+        };
+
+        var data = [];
+        for (var j = 0; j < 11; j++) {
+            var newNumber = getRandomArbitrary(1 + i, 5 + getRandomInt(1, i * 2)).toFixed(2);
+            data.push(parseFloat(newNumber));
+        }
+        obj.data = data;
+        values.push(obj);
+    }
+    return values;
 }
 
 function getMonthTemperature() {
