@@ -4,6 +4,9 @@ var http = require('http').Server(app);
 var port = process.env.PORT || 5000;
 var io = require('socket.io')(http);
 
+//Require data layer
+var data = require('./server/data');
+
 app.use(express.static(__dirname + '/'));
 
 http.listen(port, function () {
@@ -30,7 +33,7 @@ app.get('/api/avg-sold-cars', function (req, res) {
 
 //Send new temperature to all users
 function sendNewTemparature(city) {
-    var obj = getMonthTemperature();
+    var obj = data.getMonthTemperature();
     obj.cityName = city;
     io.emit('updateTemparatureForMonth', obj);
 }
@@ -75,9 +78,7 @@ var lastSentCarShareData = {};
 (function loopNewCarShare() {
     var rand = Math.round(Math.random() * 15000) + 500;
     setTimeout(function () {
-        var obj = {};
-        obj.data = getCarShare();
-        obj.year = getRandomInt(1970, 2016);
+        var obj = data.getCarShare();
         io.emit('updateCarMarketShares', obj);
 
         lastSentCarShareData = obj;
@@ -92,9 +93,7 @@ var lastSentAvgSoldCarsByMonth = {};
 (function loopNewAvgSoldCars() {
     var rand = Math.round(Math.random() * 15000) + 500;
     setTimeout(function () {
-        var obj = {};
-        obj.data = getCarAvgSale();
-        obj.year = getRandomInt(1970, 2016);
+        var obj =  data.getCarAvgSale();
         io.emit('updateAvgSoldCars', obj);
 
         lastSentAvgSoldCarsByMonth = obj;
@@ -102,83 +101,3 @@ var lastSentAvgSoldCarsByMonth = {};
         loopNewAvgSoldCars();
     }, rand);
 }());
-
-
-/**
- * Functions
- */
-var cars = ['Toyota', 'General Motors', 'Volkswagen', 'Ford', 'BMW', 'Audi', 'Others'];
-function getCarShare() {
-    var rands = [], rand, total = 0, normalized_rands = [];
-    for (var i = 0; i < cars.length; i += 1) {
-        rand = Math.random();
-        rands.push(rand);
-        total += rand;
-    }
-    for (var i = 0; i < cars.length; i += 1) {
-        rand = rands[i] / total;
-        normalized_rands.push([cars[i], rand * 100]);
-    }
-    return normalized_rands;
-}
-
-var continents = ['Africa', 'South America', 'Australia', 'North America', 'Europe', 'Asia', ];
-function getCarAvgSale() {
-    var values = [];
-    for (var i = 0; i < continents.length; i++) {
-        var obj = {
-            continentName: continents[i]
-        };
-
-        var data = [];
-        for (var j = 0; j < 11; j++) {
-            var newNumber = getRandomArbitrary(1 + i, 5 + getRandomInt(1, i * 2)).toFixed(2);
-            data.push(parseFloat(newNumber));
-        }
-        obj.data = data;
-        values.push(obj);
-    }
-    return values;
-}
-
-function getMonthTemperature() {
-    return {
-        month: getRandomIntInclusive(0, 11),
-        value: getRandomInt(0, 36)
-    };
-}
-
-function getRandomXY() {
-    return {
-        x: getRandomInt(1, 5),
-        y: getRandomInt(0, 3)
-    }
-}
-
-function getRandomData() {
-    return {
-        bool: getRandomZeroOrOne(),
-        num: getRandomIntInclusive(0, 5)
-    };
-}
-
-// Returns a random number 0 or 1 
-function getRandomZeroOrOne() {
-    return Math.floor(Math.random() * 2);
-}
-
-function getRandomArbitrary(min, max) {
-    return Math.random() * (max - min) + min;
-}
-
-// Returns a random integer between min (included) and max (excluded)
-// Using Math.round() will give you a non-uniform distribution!
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
-
-// Returns a random integer between min (included) and max (included)
-// Using Math.round() will give you a non-uniform distribution!
-function getRandomIntInclusive(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
